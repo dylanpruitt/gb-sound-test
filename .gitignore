@@ -1,0 +1,4 @@
+# ignore generated artifacts
+*.o
+*.gb
+*.sym
