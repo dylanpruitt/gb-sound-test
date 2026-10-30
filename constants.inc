@@ -15,7 +15,12 @@ DEF TEMPO_69 EQU 13
 DEF TEMPO_64 EQU 14
 DEF TEMPO_60 EQU 15
 
+; control characters
+DEF SET_INSTRUMENT EQU $FE
+DEF LOOP_TO_START EQU $FF
+
 ; note frequencies
+; values taken from https://daid.github.io/gbsfx-studio/
 DEF C3 EQU $2C80
 DEF C#3 EQU $9D80
 DEF D3 EQU $0781

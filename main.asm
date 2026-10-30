@@ -1,5 +1,4 @@
 INCLUDE "hardware.inc"
-INCLUDE "constants.inc"
 INCLUDE "macros.asm"
 
 SECTION "Header", ROM0[$100]
@@ -81,8 +80,10 @@ HandleTick:
     ld l, a
     ld a, [hli]
 
-    cp $FF
+    cp LOOP_TO_START
     jr z, RestartCH1Loop
+    cp SET_INSTRUMENT
+    jr z, SetCH1Instrument
 
     ldh [rAUD1LOW], a    ; load note pitch to registers
     ld a, [hli]
@@ -112,8 +113,10 @@ HandleTick:
     ld l, a
     ld a, [hli]
 
-    cp $FF
+    cp LOOP_TO_START
     jr z, RestartCH2Loop
+    cp SET_INSTRUMENT
+    jr z, SetCH2Instrument
 
     ldh [rAUD2LOW], a    ; load note pitch to registers
     ld a, [hli]
@@ -129,7 +132,7 @@ HandleTick:
     dec a
     ld [wCh2TicksToHold], a
 
-    jr Main
+    jp Main
 RestartCH1Loop:
     ld a, LOW(Channel1)
     ld [wChannel1Pointer], a
@@ -138,6 +141,50 @@ RestartCH2Loop:
     ld a, LOW(Channel2)
     ld [wChannel2Pointer], a
     jr HandleTick.ch2NextNote
+SetCH1Instrument:
+    ld h, HIGH(Channel1)
+    ld a, [wChannel1Pointer]
+    inc a
+    ld l, a
+    ld a, [hli]
+    ld e, a
+    ld a, [hli]
+    ld d, a
+    ; update channel pointer
+    ld a, l
+    ld [wChannel1Pointer], a
+
+    ; set length/envelope from instrument settings
+    ld l, e
+    ld h, d
+    ld a, [hli]
+    ldh [rAUD1LEN], a
+    ld a, [hli]
+    ldh [rAUD1ENV], a
+
+    jp HandleTick.nextNote
+SetCH2Instrument:
+    ld h, HIGH(Channel2)
+    ld a, [wChannel2Pointer]
+    inc a
+    ld l, a
+    ld a, [hli]
+    ld e, a
+    ld a, [hli]
+    ld d, a
+    ; update channel pointer
+    ld a, l
+    ld [wChannel2Pointer], a
+
+    ; set length/envelope from instrument settings
+    ld l, e
+    ld h, d
+    ld a, [hli]
+    ldh [rAUD2LEN], a
+    ld a, [hli]
+    ldh [rAUD2ENV], a
+
+    jp HandleTick.nextNote
 
 SECTION "Vars", WRAM0
 wTickRate:: db           ; every X VBlank cycles, handle a tick (1/16th note)
@@ -149,6 +196,7 @@ wChannel2Pointer:: db
 
 SECTION "Music", ROM0
 Channel1::
+    set_instrument TestInstrument
     note C4, 1 ; song format: each note is 3 bytes (2 for pitch, 1 for length - which is number
     note E4, 1 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
     note G4, 1 ; once the program hits $FF it loops back to the beginning
@@ -184,6 +232,13 @@ Channel1::
     db $FF ; end
 
 Channel2::
+    set_instrument TestInstrument
+    note C5, 4
+    note G5, 4
+    set_instrument TestInstrument2
     note C5, 4
     note G5, 4
     db $FF ; end
+
+TestInstrument:: instrument $80, $87
+TestInstrument2:: instrument $40, $40
