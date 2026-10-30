@@ -148,21 +148,15 @@ wChannel2Pointer:: db
 SECTION "Music", ROM0
 Channel1:: ALIGN 8          ; aligned so I only need one 8-bit register to track song position
     db HIGH(C4), LOW(C4), 2 ; song format: each note is 3 bytes (2 for pitch, 1 for length - which is number
-    ;db HIGH(D4), LOW(D4), 1 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
-    db HIGH(E4), LOW(E4), 2 ; once the program hits $FF it loops back to the beginning
-    ;db HIGH(F4), LOW(F4), 1
-    db HIGH(G4), LOW(G4), 2
-    ;db HIGH(F4), LOW(F4), 1
+    db HIGH(E4), LOW(E4), 2 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
+    db HIGH(G4), LOW(G4), 2 ; once the program hits $FF it loops back to the beginning
     db HIGH(E4), LOW(E4), 2
-    ;db HIGH(D4), LOW(D4), 1
     db $FF ; end
 
     ds $F3 ; hack to make RGBDS not complain about Channel2 not being aligned...I know it's bad, just wanted to test stuff
 Channel2:: ALIGN 8
     db HIGH(C5), LOW(C5), 4
     db HIGH(G5), LOW(G5), 4
-    ;db HIGH(C5), LOW(C5), 2
-    ;db HIGH(G5), LOW(G5), 2
     db $FF ; end
 
 ; note frequencies
