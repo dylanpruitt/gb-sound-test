@@ -1,4 +1,5 @@
 INCLUDE "hardware.inc"
+INCLUDE "constants.inc"
 
 SECTION "Header", ROM0[$100]
 
@@ -28,7 +29,7 @@ WaitVBlank:
     ld a, %10000011
     ld [rAUDENA], a
 
-    ld a, 15             ; 60 BPM = 1 beat per second = 4 16th notes per second (15 VBlank cycles per 16th note)
+    ld a, TEMPO_60
     ld [wTickRate], a
     ld a, 0
     ld [wCounter], a
@@ -146,28 +147,42 @@ wChannel1Pointer:: db    ; tracks what note is currently playing
 wChannel2Pointer:: db
 
 SECTION "Music", ROM0
-Channel1:: ALIGN 8          ; aligned so I only need one 8-bit register to track song position
-    db HIGH(C4), LOW(C4), 2 ; song format: each note is 3 bytes (2 for pitch, 1 for length - which is number
-    db HIGH(E4), LOW(E4), 2 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
-    db HIGH(G4), LOW(G4), 2 ; once the program hits $FF it loops back to the beginning
-    db HIGH(E4), LOW(E4), 2
+Channel1::
+    db HIGH(C4), LOW(C4), 1 ; song format: each note is 3 bytes (2 for pitch, 1 for length - which is number
+    db HIGH(E4), LOW(E4), 1 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
+    db HIGH(G4), LOW(G4), 1 ; once the program hits $FF it loops back to the beginning
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(C4), LOW(C4), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(G4), LOW(G4), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(B3), LOW(B3), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(G4), LOW(G4), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(B3), LOW(B3), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(G4), LOW(G4), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(A3), LOW(A3), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(G4), LOW(G4), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(A3), LOW(A3), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(G4), LOW(G4), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(B3), LOW(B3), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(G4), LOW(G4), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(B3), LOW(B3), 1
+    db HIGH(E4), LOW(E4), 1
+    db HIGH(G4), LOW(G4), 1
+    db HIGH(E4), LOW(E4), 1
     db $FF ; end
 
-    ds $F3 ; hack to make RGBDS not complain about Channel2 not being aligned...I know it's bad, just wanted to test stuff
-Channel2:: ALIGN 8
+Channel2::
     db HIGH(C5), LOW(C5), 4
     db HIGH(G5), LOW(G5), 4
     db $FF ; end
-
-; note frequencies
-DEF G3 EQU $C782
-DEF A3 EQU $5883
-DEF B3 EQU $DA83
-DEF C4 EQU $1684
-DEF D4 EQU $8384
-DEF E4 EQU $E584
-DEF F4 EQU $1185
-DEF G4 EQU $6385
-DEF C5 EQU $0B86
-DEF E5 EQU $7286
-DEF G5 EQU $B286
