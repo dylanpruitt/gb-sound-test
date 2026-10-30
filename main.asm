@@ -32,9 +32,18 @@ WaitVBlank:
     ld [wTickRate], a
     ld a, 0
     ld [wCounter], a
-    ld [wNotesToHold], a
+    ld [wCh1TicksToHold], a
+    ld [wCh2TicksToHold], a
     ld a, LOW(Channel1)
     ld [wChannel1Pointer], a
+    ld a, LOW(Channel2)
+    ld [wChannel2Pointer], a
+
+    ld a, $80
+    ldh [rAUD2LEN], a
+    ld a, $80
+    ldh [rAUD2ENV], a
+
 Main::
     ld a, [rLY]
     cp 144
@@ -56,12 +65,13 @@ HandleTick:
     ld a, [wTickRate]
     ld [wCounter], a
 
-    ld a, [wNotesToHold] ; hold a note until it's done playing, then read+play next note
+    .ch1
+    ld a, [wCh1TicksToHold] ; hold a note until it's done playing, then read+play next note
     cp 0
     jr z, .nextNote
     dec a
-    ld [wNotesToHold], a
-    jr Main
+    ld [wCh1TicksToHold], a
+    jr .ch2
 
     .nextNote
     ld h, HIGH(Channel1)
@@ -70,44 +80,90 @@ HandleTick:
     ld a, [hli]
 
     cp $FF
-    jr z, RestartLoop
+    jr z, RestartCH1Loop
 
     ldh [rAUD1LOW], a    ; load note pitch to registers
     ld a, [hli]
     ldh [rAUD1HIGH], a
 
     ld a, [hli]
-    ld [wNotesToHold], a ; load notes to hold
+    ld [wCh1TicksToHold], a ; load notes to hold
 
     ld a, l
     ld [wChannel1Pointer], a ; update channel 1 pointer
 
-    jr HandleTick
-RestartLoop:
+    ld a, [wCh1TicksToHold]
+    dec a
+    ld [wCh1TicksToHold], a
+
+    .ch2
+    ld a, [wCh2TicksToHold] ; hold a note until it's done playing, then read+play next note
+    cp 0
+    jr z, .ch2NextNote
+    dec a
+    ld [wCh2TicksToHold], a
+    jr Main
+
+    .ch2NextNote
+    ld h, HIGH(Channel2)
+    ld a, [wChannel2Pointer]
+    ld l, a
+    ld a, [hli]
+
+    cp $FF
+    jr z, RestartCH2Loop
+
+    ldh [rAUD2LOW], a    ; load note pitch to registers
+    ld a, [hli]
+    ldh [rAUD2HIGH], a
+
+    ld a, [hli]
+    ld [wCh2TicksToHold], a ; load notes to hold
+
+    ld a, l
+    ld [wChannel2Pointer], a ; update channel 2 pointer
+
+    ld a, [wCh2TicksToHold]
+    dec a
+    ld [wCh2TicksToHold], a
+
+    jr Main
+RestartCH1Loop:
     ld a, LOW(Channel1)
     ld [wChannel1Pointer], a
-    jr HandleTick
+    jr HandleTick.nextNote
+RestartCH2Loop:
+    ld a, LOW(Channel2)
+    ld [wChannel2Pointer], a
+    jr HandleTick.ch2NextNote
 
 SECTION "Vars", WRAM0
 wTickRate:: db           ; every X VBlank cycles, handle a tick (1/16th note)
 wCounter:: db            ; counts down VBlank cycles until next tick
-wNotesToHold:: db        ; counts down ticks to keep playing this note until the next one
+wCh1TicksToHold:: db     ; counts down ticks to keep playing this note until the next one
+wCh2TicksToHold:: db
 wChannel1Pointer:: db    ; tracks what note is currently playing
+wChannel2Pointer:: db
 
 SECTION "Music", ROM0
 Channel1:: ALIGN 8          ; aligned so I only need one 8-bit register to track song position
-    db HIGH(C4), LOW(C4), 4 ; song format: each note is 3 bytes (2 for pitch, 1 for length - which is number
-    db HIGH(G4), LOW(G4), 4 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
-    db HIGH(F4), LOW(F4), 1 ; once the program hits $FF it loops back to the beginning
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(D4), LOW(D4), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(D4), LOW(D4), 2
-    db HIGH(G3), LOW(G3), 2
-    db HIGH(A3), LOW(A3), 2
-    db HIGH(B3), LOW(B3), 2
+    db HIGH(C4), LOW(C4), 2 ; song format: each note is 3 bytes (2 for pitch, 1 for length - which is number
+    ;db HIGH(D4), LOW(D4), 1 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
+    db HIGH(E4), LOW(E4), 2 ; once the program hits $FF it loops back to the beginning
+    ;db HIGH(F4), LOW(F4), 1
+    db HIGH(G4), LOW(G4), 2
+    ;db HIGH(F4), LOW(F4), 1
+    db HIGH(E4), LOW(E4), 2
+    ;db HIGH(D4), LOW(D4), 1
     db $FF ; end
 
+    ds $F3 ; hack to make RGBDS not complain about Channel2 not being aligned...I know it's bad, just wanted to test stuff
+Channel2:: ALIGN 8
+    db HIGH(C5), LOW(C5), 4
+    db HIGH(G5), LOW(G5), 4
+    ;db HIGH(C5), LOW(C5), 2
+    ;db HIGH(G5), LOW(G5), 2
+    db $FF ; end
 
 ; note frequencies
 DEF G3 EQU $C782
@@ -118,3 +174,6 @@ DEF D4 EQU $8384
 DEF E4 EQU $E584
 DEF F4 EQU $1185
 DEF G4 EQU $6385
+DEF C5 EQU $0B86
+DEF E5 EQU $7286
+DEF G5 EQU $B286
