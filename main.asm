@@ -1,5 +1,6 @@
 INCLUDE "hardware.inc"
 INCLUDE "constants.inc"
+INCLUDE "macros.asm"
 
 SECTION "Header", ROM0[$100]
 
@@ -148,41 +149,41 @@ wChannel2Pointer:: db
 
 SECTION "Music", ROM0
 Channel1::
-    db HIGH(C4), LOW(C4), 1 ; song format: each note is 3 bytes (2 for pitch, 1 for length - which is number
-    db HIGH(E4), LOW(E4), 1 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
-    db HIGH(G4), LOW(G4), 1 ; once the program hits $FF it loops back to the beginning
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(C4), LOW(C4), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(G4), LOW(G4), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(B3), LOW(B3), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(G4), LOW(G4), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(B3), LOW(B3), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(G4), LOW(G4), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(A3), LOW(A3), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(G4), LOW(G4), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(A3), LOW(A3), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(G4), LOW(G4), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(B3), LOW(B3), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(G4), LOW(G4), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(B3), LOW(B3), 1
-    db HIGH(E4), LOW(E4), 1
-    db HIGH(G4), LOW(G4), 1
-    db HIGH(E4), LOW(E4), 1
+    note C4, 1 ; song format: each note is 3 bytes (2 for pitch, 1 for length - which is number
+    note E4, 1 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
+    note G4, 1 ; once the program hits $FF it loops back to the beginning
+    note E4, 1
+    note C4, 1
+    note E4, 1
+    note G4, 1
+    note E4, 1
+    note B3, 1
+    note E4, 1
+    note G4, 1
+    note E4, 1
+    note B3, 1
+    note E4, 1
+    note G4, 1
+    note E4, 1
+    note A3, 1
+    note E4, 1
+    note G4, 1
+    note E4, 1
+    note A3, 1
+    note E4, 1
+    note G4, 1
+    note E4, 1
+    note B3, 1
+    note E4, 1
+    note G4, 1
+    note E4, 1
+    note B3, 1
+    note E4, 1
+    note G4, 1
+    note E4, 1
     db $FF ; end
 
 Channel2::
-    db HIGH(C5), LOW(C5), 4
-    db HIGH(G5), LOW(G5), 4
+    note C5, 4
+    note G5, 4
     db $FF ; end
