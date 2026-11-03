@@ -29,19 +29,19 @@ WaitVBlank:
     ld a, %10000011
     ld [rAUDENA], a
 
-    ld a, TEMPO_60
+    ld a, TEMPO_180
     ld [wTickRate], a
     ld a, 0
     ld [wCounter], a
     ld [wCh1TicksToHold], a
     ld [wCh2TicksToHold], a
-    ld a, HIGH(Channel1)
+    ld a, HIGH(BattleCh1)
     ld [wChannel1Pointer], a
-    ld a, LOW(Channel1)
+    ld a, LOW(BattleCh1)
     ld [wChannel1Pointer+1], a
-    ld a, HIGH(Channel2)
+    ld a, HIGH(BattleCh2)
     ld [wChannel2Pointer], a
-    ld a, LOW(Channel2)
+    ld a, LOW(BattleCh2)
     ld [wChannel2Pointer+1], a
 
 Main::
@@ -80,7 +80,11 @@ HandleTick:
     cp LOOP_TO_START
     jr z, RestartCH1Loop
     cp SET_INSTRUMENT
-    jr z, SetCH1Instrument
+    jp z, SetCH1Instrument
+    cp SECTION_END
+    jp z, EndCH1Section
+    cp JUMP_TO_SECTION
+    jp z, JumpToCH1Section
 
     add a ; double note value in a - dw is 2 bytes so this increments by 2 bytes
 
@@ -121,6 +125,10 @@ HandleTick:
     jr z, RestartCH2Loop
     cp SET_INSTRUMENT
     jr z, SetCH2Instrument
+    cp SECTION_END
+    jp z, EndCH2Section
+    cp JUMP_TO_SECTION
+    jp z, JumpToCH2Section
 
     add a ; double note value in a - dw is 2 bytes so this increments by 2 bytes
 
@@ -151,7 +159,7 @@ RestartCH1Loop:
     ld [wChannel1Pointer], a
     ld a, LOW(Channel1)
     ld [wChannel1Pointer+1], a
-    jr HandleTick.nextNote
+    jp HandleTick.nextNote
 RestartCH2Loop:
     ld a, HIGH(Channel2)
     ld [wChannel2Pointer], a
@@ -198,6 +206,54 @@ SetCH2Instrument:
     ldh [rAUD2ENV], a
 
     jp HandleTick.ch2NextNote
+JumpToCH1Section:
+    ld a, [hli]
+    ld e, a
+    ld a, [hli]
+    ld d, a
+
+    ld a, h
+    ld [wChannel1TmpPtr], a
+    ld a, l
+    ld [wChannel1TmpPtr+1], a
+
+    ld a, d
+    ld [wChannel1Pointer], a
+    ld a, e
+    ld [wChannel1Pointer+1], a
+    jp HandleTick.nextNote
+JumpToCH2Section:
+    ld a, [hli]
+    ld e, a
+    ld a, [hli]
+    ld d, a
+
+    ld a, h
+    ld [wChannel1TmpPtr], a
+    ld a, l
+    ld [wChannel1TmpPtr+1], a
+
+    ld a, d
+    ld [wChannel2Pointer], a
+    ld a, e
+    ld [wChannel2Pointer+1], a
+    jp HandleTick.nextNote
+EndCH1Section:
+    load_ptr_to_hl wChannel1TmpPtr
+
+    ld a, h
+    ld [wChannel1Pointer], a
+    ld a, l
+    ld [wChannel1Pointer+1], a
+    jp HandleTick.nextNote
+EndCH2Section:
+    load_ptr_to_hl wChannel2TmpPtr
+
+    ld a, h
+    ld [wChannel2Pointer], a
+    ld a, l
+    ld [wChannel2Pointer+1], a
+    jp HandleTick.nextNote
 
 SECTION "Vars", WRAM0
 wTickRate:: db           ; every X VBlank cycles, handle a tick (1/16th note)
@@ -205,10 +261,19 @@ wCounter:: db            ; counts down VBlank cycles until next tick
 wCh1TicksToHold:: db     ; counts down ticks to keep playing this note until the next one
 wCh2TicksToHold:: db
 wChannel1Pointer:: dw    ; tracks what note is currently playing
+wChannel1TmpPtr:: dw     ; tracks position in song when wChannel1Ptr jumps to a section
 wChannel2Pointer:: dw
+wChannel2TmpPtr:: dw
 
 SECTION "Music", ROM0
 Channel1:
+    play_section .section1
+    play_section .section1
+    play_section .section2
+    play_section .section1
+    db LOOP_TO_START
+
+    .section1
     set_instrument Staccato
     note C4, 1 ; song format: each note is 2 bytes (1 for pitch, 1 for length - which is number
     note E4, 1 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
@@ -218,6 +283,9 @@ Channel1:
     note E4, 1
     note G4, 1
     note E4, 1
+    db SECTION_END
+
+    .section2
     set_instrument TestInstrument
     note A3, 1
     note E4, 1
@@ -227,7 +295,7 @@ Channel1:
     note E4, 1
     note G4, 1
     note E4, 1
-    db LOOP_TO_START
+    db SECTION_END
 
 Channel2:
     set_instrument Staccato
@@ -407,5 +475,5 @@ BattleCh2:
     db SECTION_END
 
 TestInstrument: instrument $40, $d0
-TestInstrument2: instrument $40, $40
+TestInstrument2: instrument $40, $80
 Staccato: instrument $80, $94
