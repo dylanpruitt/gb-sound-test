@@ -247,7 +247,18 @@ Channel2:
     db $FF ; end
 
 BattleCh1:
-    ; section 1
+    play_section .section1
+    play_section .section1
+    play_section .section1
+    play_section .section2
+    play_section .section1
+    play_section .section1
+    play_section .section1
+    play_section .section2
+    play_section .section3
+    db LOOP_TO_START
+
+    .section1
     set_instrument TestInstrument2
     note G5, 6
     note A5, 6
@@ -257,22 +268,8 @@ BattleCh1:
     note A5, 4
     set_instrument TestInstrument2
     note Bb5, 4
-    note G5, 6
-    note A5, 6
-    note Bb5, 8
-    set_instrument Staccato
-    note G5, 4
-    note A5, 4
-    set_instrument TestInstrument2
-    note Bb5, 4
-    note G5, 6
-    note A5, 6
-    note Bb5, 8
-    set_instrument Staccato
-    note G5, 4
-    note A5, 4
-    set_instrument TestInstrument2
-    note Bb5, 4
+    db SECTION_END
+    .section2
     note G5, 6
     note D6, 6
     note C6, 4
@@ -280,39 +277,8 @@ BattleCh1:
     note F#5, 4
     note G5, 4
     note A5, 4
-    ; repeat section 1
-    note G5, 6
-    note A5, 6
-    note Bb5, 8
-    set_instrument Staccato
-    note G5, 4
-    note A5, 4
-    set_instrument TestInstrument2
-    note Bb5, 4
-    note G5, 6
-    note A5, 6
-    note Bb5, 8
-    set_instrument Staccato
-    note G5, 4
-    note A5, 4
-    set_instrument TestInstrument2
-    note Bb5, 4
-    note G5, 6
-    note A5, 6
-    note Bb5, 8
-    set_instrument Staccato
-    note G5, 4
-    note A5, 4
-    set_instrument TestInstrument2
-    note Bb5, 4
-    note G5, 6
-    note D6, 6
-    note C6, 4
-    note G5, 4
-    note F#5, 4
-    note G5, 4
-    note A5, 4
-    ; section 2
+    db SECTION_END
+    .section3
     note Bb5, 6
     note C6, 6
     note D6, 8
@@ -341,10 +307,27 @@ BattleCh1:
     note A5, 4
     note G5, 4
     note F#5, 4
-    db LOOP_TO_START
+    db SECTION_END
 
 BattleCh2:
+    play_section .section1
+    play_section .section2
+    play_section .section1
+    play_section .section3
+    play_section .section4
+    play_section .section1
+    play_section .section2
+    play_section .section1
+    play_section .section3
+    play_section .section4
+    play_section .section5
+    play_section .section3
+    play_section .section3
+    play_section .section6
+    db LOOP_TO_START
+
     ; section 1
+    .section1
     set_instrument TestInstrument2
     note G3, 2
     note G4, 2
@@ -361,6 +344,8 @@ BattleCh2:
     note A3, 4
     set_instrument TestInstrument2
     note Bb3, 4
+    db SECTION_END
+    .section2
     note A3, 2
     note A4, 2
     note A3, 2
@@ -377,21 +362,8 @@ BattleCh2:
     note G3, 2
     note A3, 2
     note Bb3, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    set_instrument Staccato
-    note G3, 4
-    note A3, 4
-    set_instrument TestInstrument2
-    note Bb3, 4
+    db SECTION_END
+    .section3
     note C4, 2
     note C5, 2
     note C4, 2
@@ -400,6 +372,8 @@ BattleCh2:
     note C5, 2
     note C4, 2
     note C5, 2
+    db SECTION_END
+    .section4
     note C4, 2
     note C5, 2
     note D5, 2
@@ -408,70 +382,8 @@ BattleCh2:
     note D4, 2
     note A3, 2
     note F#3, 2
-    ; repeat section 1
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    set_instrument Staccato
-    note G3, 4
-    note A3, 4
-    set_instrument TestInstrument2
-    note Bb3, 4
-    note A3, 2
-    note A4, 2
-    note A3, 2
-    note A4, 2
-    note A3, 2
-    note A4, 2
-    note Bb3, 2
-    note Bb4, 2
-    note Bb3, 2
-    note Bb4, 2
-    note C4, 2
-    note Bb3, 2
-    note A3, 2
-    note G3, 2
-    note A3, 2
-    note Bb3, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    note G3, 2
-    note G4, 2
-    set_instrument Staccato
-    note G3, 4
-    note A3, 4
-    set_instrument TestInstrument2
-    note Bb3, 4
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
-    note D5, 2
-    note A4, 2
-    note F#4, 2
-    note D4, 2
-    note A3, 2
-    note F#3, 2
-    ; section 2
+    db SECTION_END
+    .section5
     note F3, 4
     note Bb3, 4
     note Eb4, 4
@@ -485,22 +397,8 @@ BattleCh2:
     note Eb4, 6
     note D4, 4
     note Bb3, 4
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
-    note C4, 2
-    note C5, 2
+    db SECTION_END
+    .section6
     note Bb3, 2
     note Bb4, 2
     note C4, 2
@@ -515,7 +413,7 @@ BattleCh2:
     note D4, 2
     note A3, 2
     note F#3, 2
-    db LOOP_TO_START
+    db SECTION_END
 
 TestInstrument: instrument $80, $87
 TestInstrument2: instrument $40, $40

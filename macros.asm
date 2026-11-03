@@ -18,3 +18,9 @@ MACRO set_instrument
 	db SET_INSTRUMENT
 	dw \1
 ENDM
+
+; @param 1: address to section to play
+MACRO play_section
+	db JUMP_TO_SECTION
+	dw \1
+ENDM
