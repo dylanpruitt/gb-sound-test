@@ -24,3 +24,11 @@ MACRO play_section
 	db JUMP_TO_SECTION
 	dw \1
 ENDM
+
+; @param 1: address of pointer to load to HL (1st byte is high/h, 2nd byte is low/l)
+MACRO load_ptr_to_hl
+	ld a, [\1]
+    ld h, a
+    ld a, [\1+1]
+    ld l, a
+ENDM
