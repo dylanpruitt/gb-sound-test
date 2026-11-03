@@ -40,11 +40,6 @@ WaitVBlank:
     ld a, LOW(Channel2)
     ld [wChannel2Pointer], a
 
-    ld a, $80
-    ldh [rAUD2LEN], a
-    ld a, $80
-    ldh [rAUD2ENV], a
-
 Main::
     ld a, [rLY]
     cp 144
@@ -85,9 +80,16 @@ HandleTick:
     cp SET_INSTRUMENT
     jr z, SetCH1Instrument
 
-    ldh [rAUD1LOW], a    ; load note pitch to registers
-    ld a, [hli]
-    ldh [rAUD1HIGH], a
+    add a ; double note value in a - dw is 2 bytes so this increments by 2 bytes
+
+    ld de, NotePeriods ; set de to point to note period address
+    ld e, a
+
+    ld a, [de]
+    ldh [rAUD1HIGH], a    ; load note pitch to registers
+    inc e
+    ld a, [de]
+    ldh [rAUD1LOW], a
 
     ld a, [hli]
     ld [wCh1TicksToHold], a ; load notes to hold
@@ -118,9 +120,16 @@ HandleTick:
     cp SET_INSTRUMENT
     jr z, SetCH2Instrument
 
-    ldh [rAUD2LOW], a    ; load note pitch to registers
-    ld a, [hli]
-    ldh [rAUD2HIGH], a
+    add a ; double note value in a - dw is 2 bytes so this increments by 2 bytes
+
+    ld de, NotePeriods ; set de to point to note period address
+    ld e, a
+
+    ld a, [de]
+    ldh [rAUD2HIGH], a    ; load note pitch to registers
+    inc e
+    ld a, [de]
+    ldh [rAUD2LOW], a
 
     ld a, [hli]
     ld [wCh2TicksToHold], a ; load notes to hold
@@ -195,9 +204,8 @@ wChannel1Pointer:: db    ; tracks what note is currently playing
 wChannel2Pointer:: db
 
 SECTION "Music", ROM0
-Channel1::
-    set_instrument TestInstrument
-    note C4, 1 ; song format: each note is 3 bytes (2 for pitch, 1 for length - which is number
+Channel1:
+    note C4, 1 ; song format: each note is 2 bytes (1 for pitch, 1 for length - which is number
     note E4, 1 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
     note G4, 1 ; once the program hits $FF it loops back to the beginning
     note E4, 1
@@ -231,14 +239,284 @@ Channel1::
     note E4, 1
     db $FF ; end
 
-Channel2::
-    set_instrument TestInstrument
+Channel2:
     note C5, 4
     note G5, 4
-    set_instrument TestInstrument2
     note C5, 4
     note G5, 4
     db $FF ; end
 
-TestInstrument:: instrument $80, $87
-TestInstrument2:: instrument $40, $40
+BattleCh1:
+    ; section 1
+    set_instrument TestInstrument2
+    note G5, 6
+    note A5, 6
+    note Bb5, 8
+    set_instrument Staccato
+    note G5, 4
+    note A5, 4
+    set_instrument TestInstrument2
+    note Bb5, 4
+    note G5, 6
+    note A5, 6
+    note Bb5, 8
+    set_instrument Staccato
+    note G5, 4
+    note A5, 4
+    set_instrument TestInstrument2
+    note Bb5, 4
+    note G5, 6
+    note A5, 6
+    note Bb5, 8
+    set_instrument Staccato
+    note G5, 4
+    note A5, 4
+    set_instrument TestInstrument2
+    note Bb5, 4
+    note G5, 6
+    note D6, 6
+    note C6, 4
+    note G5, 4
+    note F#5, 4
+    note G5, 4
+    note A5, 4
+    ; repeat section 1
+    note G5, 6
+    note A5, 6
+    note Bb5, 8
+    set_instrument Staccato
+    note G5, 4
+    note A5, 4
+    set_instrument TestInstrument2
+    note Bb5, 4
+    note G5, 6
+    note A5, 6
+    note Bb5, 8
+    set_instrument Staccato
+    note G5, 4
+    note A5, 4
+    set_instrument TestInstrument2
+    note Bb5, 4
+    note G5, 6
+    note A5, 6
+    note Bb5, 8
+    set_instrument Staccato
+    note G5, 4
+    note A5, 4
+    set_instrument TestInstrument2
+    note Bb5, 4
+    note G5, 6
+    note D6, 6
+    note C6, 4
+    note G5, 4
+    note F#5, 4
+    note G5, 4
+    note A5, 4
+    ; section 2
+    note Bb5, 6
+    note C6, 6
+    note D6, 8
+    note Bb5, 4
+    note C6, 4
+    note D6, 4
+    note C6, 6
+    note F6, 6
+    note Eb6, 8
+    note D6, 2
+    note Eb6, 2
+    note F6, 2
+    note Eb6, 2
+    note D6, 2
+    note Eb6, 2
+    note Eb6, 6
+    note D6, 6
+    note C6, 4
+    note Eb6, 6
+    note D6, 6
+    note C6, 4
+    note Bb5, 6
+    note C6, 6
+    note D6, 4
+    note Bb5, 4
+    note A5, 4
+    note G5, 4
+    note F#5, 4
+    db LOOP_TO_START
+
+BattleCh2:
+    ; section 1
+    set_instrument TestInstrument2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    set_instrument Staccato
+    note G3, 4
+    note A3, 4
+    set_instrument TestInstrument2
+    note Bb3, 4
+    note A3, 2
+    note A4, 2
+    note A3, 2
+    note A4, 2
+    note A3, 2
+    note A4, 2
+    note Bb3, 2
+    note Bb4, 2
+    note Bb3, 2
+    note Bb4, 2
+    note C4, 2
+    note Bb3, 2
+    note A3, 2
+    note G3, 2
+    note A3, 2
+    note Bb3, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    set_instrument Staccato
+    note G3, 4
+    note A3, 4
+    set_instrument TestInstrument2
+    note Bb3, 4
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note D5, 2
+    note A4, 2
+    note F#4, 2
+    note D4, 2
+    note A3, 2
+    note F#3, 2
+    ; repeat section 1
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    set_instrument Staccato
+    note G3, 4
+    note A3, 4
+    set_instrument TestInstrument2
+    note Bb3, 4
+    note A3, 2
+    note A4, 2
+    note A3, 2
+    note A4, 2
+    note A3, 2
+    note A4, 2
+    note Bb3, 2
+    note Bb4, 2
+    note Bb3, 2
+    note Bb4, 2
+    note C4, 2
+    note Bb3, 2
+    note A3, 2
+    note G3, 2
+    note A3, 2
+    note Bb3, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    note G3, 2
+    note G4, 2
+    set_instrument Staccato
+    note G3, 4
+    note A3, 4
+    set_instrument TestInstrument2
+    note Bb3, 4
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note D5, 2
+    note A4, 2
+    note F#4, 2
+    note D4, 2
+    note A3, 2
+    note F#3, 2
+    ; section 2
+    note F3, 4
+    note Bb3, 4
+    note Eb4, 4
+    note G3, 6
+    note C4, 6
+    note F4, 8
+    note G3, 4
+    note C4, 4
+    note F4, 4
+    note A3, 6
+    note Eb4, 6
+    note D4, 4
+    note Bb3, 4
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note C4, 2
+    note C5, 2
+    note Bb3, 2
+    note Bb4, 2
+    note C4, 2
+    note Bb3, 2
+    note A3, 4
+    note Bb3, 4
+    note Bb3, 2
+    note Bb4, 2
+    note D5, 2
+    note A4, 2
+    note F#4, 2
+    note D4, 2
+    note A3, 2
+    note F#3, 2
+    db LOOP_TO_START
+
+TestInstrument: instrument $80, $87
+TestInstrument2: instrument $40, $40
+Staccato: instrument $80, $94
