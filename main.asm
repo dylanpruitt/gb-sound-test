@@ -29,20 +29,7 @@ WaitVBlank:
     ld a, %10000011
     ld [rAUDENA], a
 
-    ld a, TEMPO_180
-    ld [wTickRate], a
-    ld a, 0
-    ld [wCounter], a
-    ld [wCh1TicksToHold], a
-    ld [wCh2TicksToHold], a
-    ld a, HIGH(BattleCh1)
-    ld [wChannel1Pointer], a
-    ld a, LOW(BattleCh1)
-    ld [wChannel1Pointer+1], a
-    ld a, HIGH(BattleCh2)
-    ld [wChannel2Pointer], a
-    ld a, LOW(BattleCh2)
-    ld [wChannel2Pointer+1], a
+    play_song SongBattle2
 
 Main::
     ld a, [rLY]
@@ -155,15 +142,15 @@ HandleTick:
 
     jp Main
 RestartCH1Loop:
-    ld a, HIGH(Channel1)
+    ld a, [wChannel1StartPointer]
     ld [wChannel1Pointer], a
-    ld a, LOW(Channel1)
+    ld a, [wChannel1StartPointer+1]
     ld [wChannel1Pointer+1], a
     jp HandleTick.nextNote
 RestartCH2Loop:
-    ld a, HIGH(Channel2)
+    ld a, [wChannel2StartPointer]
     ld [wChannel2Pointer], a
-    ld a, LOW(Channel2)
+    ld a, [wChannel2StartPointer+1]
     ld [wChannel2Pointer+1], a
     jr HandleTick.ch2NextNote
 SetCH1Instrument:
@@ -256,13 +243,15 @@ EndCH2Section:
     jp HandleTick.ch2NextNote
 
 SECTION "Vars", WRAM0
-wTickRate:: db           ; every X VBlank cycles, handle a tick (1/16th note)
-wCounter:: db            ; counts down VBlank cycles until next tick
-wCh1TicksToHold:: db     ; counts down ticks to keep playing this note until the next one
+wTickRate:: db             ; every X VBlank cycles, handle a tick (1/16th note)
+wCounter:: db              ; counts down VBlank cycles until next tick
+wCh1TicksToHold:: db       ; counts down ticks to keep playing this note until the next one
 wCh2TicksToHold:: db
-wChannel1Pointer:: dw    ; tracks what note is currently playing
-wChannel1TmpPtr:: dw     ; tracks position in song when wChannel1Ptr jumps to a section
+wChannel1Pointer:: dw      ; tracks what note is currently playing
+wChannel1StartPointer:: dw ; tracks channel start address for looping
+wChannel1TmpPtr:: dw       ; tracks position in song when wChannel1Ptr jumps to a section
 wChannel2Pointer:: dw
+wChannel2StartPointer:: dw
 wChannel2TmpPtr:: dw
 
 SECTION "Music", ROM0

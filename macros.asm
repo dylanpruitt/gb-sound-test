@@ -19,10 +19,35 @@ MACRO set_instrument
 	dw \1
 ENDM
 
-; @param 1: address to section to play
+; @param 1: address of section to play
 MACRO play_section
 	db JUMP_TO_SECTION
 	dw \1
+ENDM
+
+; @param 1: address of song to play
+MACRO play_song
+	ld hl, \1
+	ld a, [hli]
+	; initialize tick vars
+    ld [wTickRate], a
+    ld a, 0
+    ld [wCounter], a
+    ld [wCh1TicksToHold], a
+    ld [wCh2TicksToHold], a
+    ; set channel pointers
+    ld a, [hli]
+    ld [wChannel1Pointer+1], a
+    ld [wChannel1StartPointer+1], a
+    ld a, [hli]
+    ld [wChannel1Pointer], a
+    ld [wChannel1StartPointer], a
+    ld a, [hli]
+    ld [wChannel2Pointer+1], a
+    ld [wChannel2StartPointer+1], a
+    ld a, [hli]
+    ld [wChannel2Pointer], a
+    ld [wChannel2StartPointer], a
 ENDM
 
 ; @param 1: address of pointer to load to HL (1st byte is high/h, 2nd byte is low/l)
