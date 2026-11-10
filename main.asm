@@ -229,9 +229,9 @@ JumpToCH2Section:
     ld d, a
 
     ld a, h
-    ld [wChannel1TmpPtr], a
+    ld [wChannel2TmpPtr], a
     ld a, l
-    ld [wChannel1TmpPtr+1], a
+    ld [wChannel2TmpPtr+1], a
 
     ld a, d
     ld [wChannel2Pointer], a
@@ -274,7 +274,6 @@ Channel1:
     db LOOP_TO_START
 
     .section1
-    set_instrument Staccato
     note C4, 1 ; song format: each note is 2 bytes (1 for pitch, 1 for length - which is number
     note E4, 1 ; of 16th notes to hold for, so '4' is a whole note, '2' is an eighth note, etc.)
     note G4, 1 ; once the program hits $FF it loops back to the beginning
@@ -286,7 +285,7 @@ Channel1:
     db SECTION_END
 
     .section2
-    set_instrument TestInstrument
+
     note A3, 1
     note E4, 1
     note G4, 1
@@ -298,7 +297,7 @@ Channel1:
     db SECTION_END
 
 Channel2:
-    set_instrument Staccato
+
     note C5, 4
     note G5, 4
     note C5, 4
@@ -306,6 +305,7 @@ Channel2:
     db $FF ; end
 
 BattleCh1:
+    set_instrument TestInstrument
     play_section .section1
     play_section .section1
     play_section .section1
@@ -318,14 +318,12 @@ BattleCh1:
     db LOOP_TO_START
 
     .section1
-    set_instrument TestInstrument2
     note G5, 6
     note A5, 6
     note Bb5, 8
-    set_instrument Staccato
+
     note G5, 4
     note A5, 4
-    set_instrument TestInstrument2
     note Bb5, 4
     db SECTION_END
     .section2
@@ -369,6 +367,7 @@ BattleCh1:
     db SECTION_END
 
 BattleCh2:
+    set_instrument TestInstrument
     play_section .section1
     play_section .section2
     play_section .section1
@@ -387,7 +386,6 @@ BattleCh2:
 
     ; section 1
     .section1
-    set_instrument TestInstrument2
     note G3, 2
     note G4, 2
     note G3, 2
@@ -398,10 +396,9 @@ BattleCh2:
     note G4, 2
     note G3, 2
     note G4, 2
-    set_instrument Staccato
+
     note G3, 4
     note A3, 4
-    set_instrument TestInstrument2
     note Bb3, 4
     db SECTION_END
     .section2
@@ -474,6 +471,6 @@ BattleCh2:
     note F#3, 2
     db SECTION_END
 
-TestInstrument: instrument $40, $d0
+TestInstrument: instrument $80, $80
 TestInstrument2: instrument $40, $80
 Staccato: instrument $80, $94
