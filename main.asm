@@ -237,7 +237,7 @@ JumpToCH2Section:
     ld [wChannel2Pointer], a
     ld a, e
     ld [wChannel2Pointer+1], a
-    jp HandleTick.nextNote
+    jp HandleTick.ch2NextNote
 EndCH1Section:
     load_ptr_to_hl wChannel1TmpPtr
 
@@ -253,7 +253,7 @@ EndCH2Section:
     ld [wChannel2Pointer], a
     ld a, l
     ld [wChannel2Pointer+1], a
-    jp HandleTick.nextNote
+    jp HandleTick.ch2NextNote
 
 SECTION "Vars", WRAM0
 wTickRate:: db           ; every X VBlank cycles, handle a tick (1/16th note)
