@@ -1,18 +1,41 @@
 INCLUDE "hardware.inc"
 INCLUDE "macros.asm"
 
+SECTION "VBlank Interrupt", ROM0[$0040]
+VBlankInterrupt:
+    jp VBlankHandler
+
+SECTION "VBlank Handler", ROM0
+VBlankHandler:
+    push af
+    push de
+    push hl
+
+    ld a, [wCounter] ; wait for tick
+    cp 0
+    call z, HandleTick
+
+    ld a, [wCounter]
+    dec a
+    ld [wCounter], a
+
+    pop hl
+    pop de
+    pop af
+
+    reti
+
 SECTION "Header", ROM0[$100]
 
 	jp EntryPoint
 
 	ds $150 - @, 0 ; make room for header
 
-EntryPoint::
-	; Do not turn the LCD off outside of VBlank
-WaitVBlank:
-	ld a, [rLY]
-	cp 144
-	jp c, WaitVBlank
+EntryPoint:
+    .waitVBlank
+    ld a, [rLY]
+    cp 144
+    jr c, .waitVBlank
 
 	; Turn the LCD off
 	ld a, 0
@@ -29,24 +52,16 @@ WaitVBlank:
     ld a, %10000011
     ld [rAUDENA], a
 
-    play_song SongBattle2
+    play_song SongShop
 
+    ld a, IF_VBLANK
+    ldh [rIE], a
+    xor a
+    ldh [rIF], a
+
+    ei
 Main::
-    ld a, [rLY]
-    cp 144
-    jr nc, Main
-WaitVBlank2:
-    ld a, [rLY]
-    cp 144
-    jr c, WaitVBlank2
-
-    ld a, [wCounter] ; wait for tick
-    cp 0
-    jr z, HandleTick
-
-    dec a
-    ld [wCounter], a
-
+    halt
     jr Main
 HandleTick:
     ld a, [wTickRate]
@@ -65,13 +80,15 @@ HandleTick:
     ld a, [hli]
 
     cp LOOP_TO_START
-    jr z, RestartCH1Loop
+    jp z, RestartCH1Loop
     cp SET_INSTRUMENT
     jp z, SetCH1Instrument
     cp SECTION_END
     jp z, EndCH1Section
     cp JUMP_TO_SECTION
     jp z, JumpToCH1Section
+    cp REST
+    jp z, HandleCH1Rest
 
     add a ; double note value in a - dw is 2 bytes so this increments by 2 bytes
 
@@ -84,6 +101,7 @@ HandleTick:
     ld a, [de]
     ldh [rAUD1LOW], a
 
+    .updateCh1Ticks
     ld a, [hli]
     ld [wCh1TicksToHold], a ; load notes to hold
 
@@ -102,7 +120,8 @@ HandleTick:
     jr z, .ch2NextNote
     dec a
     ld [wCh2TicksToHold], a
-    jr Main
+
+    ret
 
     .ch2NextNote
     load_ptr_to_hl wChannel2Pointer
@@ -116,6 +135,8 @@ HandleTick:
     jp z, EndCH2Section
     cp JUMP_TO_SECTION
     jp z, JumpToCH2Section
+    cp REST
+    jp z, HandleCH2Rest
 
     add a ; double note value in a - dw is 2 bytes so this increments by 2 bytes
 
@@ -128,6 +149,7 @@ HandleTick:
     ld a, [de]
     ldh [rAUD2LOW], a
 
+    .updateCh2Ticks
     ld a, [hli]
     ld [wCh2TicksToHold], a ; load notes to hold
 
@@ -140,7 +162,8 @@ HandleTick:
     dec a
     ld [wCh2TicksToHold], a
 
-    jp Main
+    ret
+
 RestartCH1Loop:
     ld a, [wChannel1StartPointer]
     ld [wChannel1Pointer], a
@@ -241,6 +264,16 @@ EndCH2Section:
     ld a, l
     ld [wChannel2Pointer+1], a
     jp HandleTick.ch2NextNote
+HandleCH1Rest:
+    ld a, $00
+    ldh [rAUD1ENV], a
+
+    jp HandleTick.updateCh1Ticks
+HandleCH2Rest:
+    ld a, $00
+    ldh [rAUD2ENV], a
+
+    jp HandleTick.updateCh2Ticks
 
 SECTION "Vars", WRAM0
 wTickRate:: db             ; every X VBlank cycles, handle a tick (1/16th note)
