@@ -7,6 +7,12 @@ MACRO note
 	db \1, \2
 ENDM
 
+; shortcut to write rest data to ROM
+; @param 1: length in 16th notes (16th note=1, 8th note=2, quarter note=4, etc.)
+MACRO rest
+    db REST, \1
+ENDM
+
 ; @param 1: length
 ; @param 2: envelope
 MACRO instrument
