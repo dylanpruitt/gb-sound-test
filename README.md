@@ -25,6 +25,7 @@ After that, you can write song data:
     .section1
     note G5, 8
     note Bb5, 8
+    rest 8      ; use this to represent channel rest for X 16th notes
     note A5, 16
     db SECTION_END
 ```
@@ -32,12 +33,4 @@ After that, you can write song data:
 Then, call the play_song macro like this:  
 ```play_song SongBattle2 ; pointer to song```
 
-and run this code in the main loop during each VBlank:  
-```asm
-    ld a, [wCounter] ; wait for tick
-    cp 0
-    jr z, HandleTick
-
-    dec a
-    ld [wCounter], a
-```
+and call `UpdateAudio` during VBlank. See this repo's [main.asm](https://github.com/dylanpruitt/gb-sound-test/blob/main/main.asm#L14) file for an example.
